@@ -28,7 +28,7 @@ namespace Read_m3u_file
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Video}/{action=Playlist}/{id?}");
+                pattern: "{controller=Video}/{action=Index}/{id?}");
 
             app.Run();
         }

@@ -15,5 +15,17 @@
             }
             return videoUrls;   
         }
+
+        public static void WriteM3UFile(string path, List<string> videoUrls)
+        {
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.WriteLine("#EXTM3U");
+                foreach (string videoUrl in videoUrls)
+                {
+                    writer.WriteLine(videoUrl);
+                }
+            }
+        }
     }
 }

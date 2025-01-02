@@ -1,202 +1,155 @@
-﻿@model List<string>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Video Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root {
-            --background: #141414;
-            --surface: #232323;
-            --primary: #e50914;
-            --text: #ffffff;
-            --text-secondary: #b3b3b3;
-        }
+﻿<div class="container mt-5">
+    <h1 class="text-center mb-4">🎥 Playlist Viewer</h1>
 
-        body {
-            font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            margin: 0;
-            min-height: 100vh;
-        }
+    <!-- Video Player -->
+    <div class="video-player mb-4">
+        <video id="main-video" controls width="100%" class="rounded"></video>
+    </div>
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0;
-        }
-
-        .header {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-            padding: 1rem 2rem;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            color: var(--primary);
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-            padding: 5rem 2rem 2rem 2rem;
-        }
-
-        #video-player {
-            background: black;
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #main-video {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-        }
-
-        #playlist {
-            background: var(--surface);
-            border-radius: 4px;
-            overflow: hidden;
-            height: calc(100vh - 7rem);
-            position: sticky;
-            top: 5rem;
-        }
-
-        .playlist-header {
-            padding: 1rem;
-            background: rgba(0,0,0,0.2);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .playlist-content {
-            overflow-y: auto;
-            height: calc(100% - 3.5rem);
-        }
-
-        #playlist ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #playlist li {
-            transition: all 0.2s ease;
-        }
-
-        #playlist a {
-            display: flex;
-            padding: 1rem;
-            color: var(--text);
-            text-decoration: none;
-            border-left: 3px solid transparent;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-            #playlist a:hover {
-                background: rgba(255,255,255,0.1);
-                border-left-color: var(--primary);
-            }
-
-            #playlist a.active {
-                background: rgba(229, 9, 20, 0.1);
-                border-left-color: var(--primary);
-                color: var(--primary);
-            }
-
-        .episode-number {
-            min-width: 2rem;
-            margin-right: 1rem;
-            opacity: 0.7;
-        }
-
-       
-            grid-template-columns: 1fr;
-        }
-
-        #playlist {
-            height: auto;
-            position: relative;
-            top: 0;
-        }
-
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--surface);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 4px;
-        }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255,255,255,0.3);
-            }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <a href="#" class="logo">VIDEOFLIX</a>
-    </header>
-    <div class="container">
-        <div class="main-content">
-            <div id="video-player">
-                <video id="main-video" controls></video>
+    <!-- Upload M3U File -->
+    <div class="custom-playlist-form mt-4">
+        <h4 class="text-center">📤 Upload M3U File</h4>
+        <form method="post" enctype="multipart/form-data" action="/Video/UploadM3UFile">
+            <div class="form-group">
+                <label for="m3uFile">Select a .m3u file:</label>
+                <input type="file" id="m3uFile" name="file" class="form-control" accept=".m3u" required />
             </div>
-            <div id="playlist">
-                <div class="playlist-header">
-                    <h2 style="margin: 0">Episodes</h2>
-                </div>
-                <div class="playlist-content">
-                    <ul>
-                        @for (int i = 0; i < Model.Count; i++)
-                        {
-                            <li>
-                                <a href="#" onclick="playVideo('@Model[i]', this); return false;">
-                                    <span class="episode-number">@(i + 1)</span>
-                                    <span class="episode-title">@Model[i]</span>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-dark">Upload</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter and Sort Form -->
+    <form method="get" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="filterBy" value="@ViewBag.FilterBy" class="form-control" placeholder="🔍 Filter by keyword" />
+            </div>
+            <div class="col-md-4">
+                <select name="sortBy" class="form-control">
+                    <option value="">Sort By</option>
+                    <option value="name" selected="@(ViewBag.SortBy == "name")">Name</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-dark w-100">Apply</button>
             </div>
         </div>
-    </div>
-    <script>
-        function playVideo(url, element) {
-            document.querySelectorAll('#playlist a').forEach(a => a.classList.remove('active'));
-            element.classList.add('active');
+    </form>
 
-            var video = document.getElementById('main-video');
-            if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-            } else if (Hls.isSupported()) {
-                var hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(video);
-            } else {
-                alert("Your browser does not support HLS.");
+    <!-- Playlist Table -->
+    <div class="playlist-table p-3">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Video URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var url in Model)
+                {
+                    <tr>
+                        <td>@url</td>
+                        <td>
+                            <a href="javascript:void(0)" onclick="playVideo('@url', this)" class="btn btn-play btn-sm">▶ Play</a>
+                            <a href="@url" target="_blank" class="btn btn-open btn-sm">🌐 Open</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= Math.Ceiling((double)ViewBag.TotalItems / ViewBag.PageSize); i++)
+            {
+                <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Playlist", new { filePath = ViewBag.FilePath, filterBy = ViewBag.FilterBy, sortBy = ViewBag.SortBy, page = i, pageSize = ViewBag.PageSize })">@i</a>
+                </li>
             }
-            video.play();
+        </ul>
+    </nav>
+
+    <!-- Export Options -->
+    <div class="mt-4 text-center">
+        <h4>📤 Export Playlist</h4>
+        <a href="@Url.Action("Export", new { filePath = ViewBag.FilePath, format = "json" })" class="btn btn-secondary">JSON</a>
+        <a href="@Url.Action("Export", new { filePath = ViewBag.FilePath, format = "txt" })" class="btn btn-secondary">TXT</a>
+        <a href="@Url.Action("Export", new { filePath = ViewBag.FilePath, format = "csv" })" class="btn btn-secondary">CSV</a>
+    </div>
+
+    <!-- Create Custom Playlist -->
+    <div class="custom-playlist-form mt-4">
+        <h4 class="text-center">📝 Create Custom Playlist</h4>
+        <form id="createPlaylistForm">
+            <div class="form-group">
+                <label for="videoUrls">Enter Video URLs (one per line):</label>
+                <textarea id="videoUrls" name="videoUrls" class="form-control" rows="5"></textarea>
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-dark">Create Playlist</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Include hls.js for HLS stream support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    // Play video in the embedded player
+    function playVideo(url, element) {
+        // Remove active class from all links
+        document.querySelectorAll('#playlist a').forEach(a => a.classList.remove('active'));
+
+        // Add active class to the clicked link
+        element.classList.add('active');
+
+        var video = document.getElementById('main-video');
+
+        // Check for native HLS support (Safari)
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
         }
-    </script>
-</body>
-</html>
+        // Check for hls.js support (other browsers)
+        else if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+        }
+        // Unsupported browser
+        else {
+            alert("Your browser does not support HLS.");
+        }
+
+        // Start playback
+        video.play();
+    }
+
+    // Handle custom playlist creation
+    document.getElementById('createPlaylistForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const videoUrls = document.getElementById('videoUrls').value.split('\n').filter(url => url.trim() !== '');
+
+        fetch('/api/playlist/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(videoUrls),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data); // Show success message
+            location.reload(); // Refresh the page to show the new playlist
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while creating the playlist.');
+        });
+    });
+</script>
