@@ -1,11 +1,8 @@
 ﻿@model List<string>
 
-@{
-    ViewData["Title"] = "My Playlists";
-}
 
 <div class="container mt-5">
-    <h1 class="text-center mb-4">📁 My Playlists</h1>
+   
 
     <!-- Upload M3U File -->
     <div class="custom-playlist-form mt-4">
@@ -29,6 +26,7 @@
                 <tr>
                     <th>File Name</th>
                     <th>Action</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +36,9 @@
                         <td>@file</td>
                         <td>
                             <a href="@Url.Action("ViewChannels", new { fileName = file })" class="btn btn-success btn-sm">View Channels</a>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("DeleteM3UFile", new { fileName = file })" class="btn btn-danger btn-sm">Delete</a>
                         </td>
                     </tr>
                 }

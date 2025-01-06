@@ -34,11 +34,30 @@ namespace Read_m3u_file.Controllers
         {
             var userId = GetUserId();
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", userId);
+
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
+
             return uploadsFolder;
+        }
+
+        // This method deletes the selected .m3u file from the user's upload folder.
+        public IActionResult DeleteM3UFile(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return BadRequest("File name is required.");
+            }
+            var userUploadFolder = GetUserUploadFolder();
+            var filePath = Path.Combine(userUploadFolder, fileName);
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found.");
+            }
+            System.IO.File.Delete(filePath);
+            return RedirectToAction("Index");
         }
 
         // This method retrieves the list of .m3u files uploaded by the user and displays them on the Index view.
@@ -83,8 +102,13 @@ namespace Read_m3u_file.Controllers
         }
 
         // This method reads the selected .m3u file and displays the list of channels on the ViewChannels view.
-        public IActionResult ViewChannels(string fileName)
+        public IActionResult ViewChannels(string fileName, string filterBy = null, string sortBy = null, int page = 1, int pageSize = 10)
         {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return BadRequest("File name is required.");
+            }
+
             var userUploadFolder = GetUserUploadFolder();
             var filePath = Path.Combine(userUploadFolder, fileName);
 
@@ -94,8 +118,39 @@ namespace Read_m3u_file.Controllers
             }
 
             var channels = M3UHelper.ReadM3UFile(filePath);
+
+            // Filtering
+            if (!string.IsNullOrEmpty(filterBy))
+            {
+                channels = channels.Where(c => c.Name.Contains(filterBy, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "name":
+                        channels = channels.OrderBy(c => c.Name).ToList();
+                        break;
+                    case "name_desc":
+                        channels = channels.OrderByDescending(c => c.Name).ToList();
+                        break;
+                }
+            }
+
+            // Pagination
+            var totalItems = channels.Count;
+            var paginatedChannels = channels.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.FileName = fileName;
-            return View(channels);
+            ViewBag.FilterBy = filterBy;
+            ViewBag.SortBy = sortBy;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalItems = totalItems;
+
+            return View(paginatedChannels);
         }
     }
 }

@@ -9,16 +9,30 @@
     <link rel="stylesheet" href="~/Read_m3u_file.styles.css" asp-append-version="true" />
 </head>
 <body>
-   
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark " >
+        <div class="container">
+            <a class="navbar-brand" href="/">🎥 M3U Playlist Viewer</a>
+            <button class="navbar-toggler"  type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+           
+        </div>
+    </nav>
 
-    <footer class="border-top footer text-muted">
-        
+    <!-- Main Content -->
+    <main role="main" class="container">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            &copy; @DateTime.Now.Year - M3U Playlist Viewer
+        </div>
     </footer>
+
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
